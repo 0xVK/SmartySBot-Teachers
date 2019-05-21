@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename = 'icon.ico') }}" type="image/x-icon">
+
+    <title>{% block title %}SmartySTBot{% endblock %}</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link brand-title" href="#">SmartySTBot/</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/fl1/metrics">Статистика</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/fl1/users">Користувачі</a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="content">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="{{ url_for('static', filename = 'js/libs/jquery-3.2.1.slim.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/libs/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/libs/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/libs/Chart.min.js') }}"></script>
+    
+    <script>
+      //Chart.defaults.global.responsive = true;
+      //Chart.defaults.global.scaleBeginAtZero = true;
+      //Chart.defaults.global.barBeginAtOrigin = false,
+    </script>
+    
+    {% block js %}
+    {% endblock %}
+    
+  </body>
+</html>

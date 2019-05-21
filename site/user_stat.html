@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика {{ data.user[2] }}{% endblock %}
+
+{% block content %}
+     
+  <div class="content">
+    
+    <div class="alert alert-warning" role="alert">
+      [{{ data.user[0] }}] <b>{{ data.user[1] }}</b> {{ data.user[2] }} {{ data.user[3] }} <i>({{ data.user[4] }})</i> <br><b>Реєстрація:</b> {{ data.user[5] }} <b>Остання активність: </b>{{ data.user[6] }}
+    </div>
+    
+   {% if data.actions %}
+    <table class="table table-bordered  table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Action ID</th>
+          <th scope="col">Type</th>
+          <th scope="col">Group</th>
+          <th scope="col">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+       {% for action in data.actions %}
+        <tr>
+          <th scope="row">{{ action.action_id }}</th>
+          <td>{{ action.action_type }}</td>
+          <td>{{ action.action_group }}</td>
+          <td>{{ action.action_date }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+      </tbody>
+  </table>
+  {% endif %}
+</div>
+    
+{% endblock %}

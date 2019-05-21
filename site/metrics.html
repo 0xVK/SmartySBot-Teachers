@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}SmartySTeachersBot метрика{% endblock %}
+
+{% block content %}
+     
+      <div class="content">
+        <div class="row">
+          <div class="col-md-6">
+            <b>Користувачів зареєстровано:</b> {{ data.all_users_count }} <br>
+            <b>Зареєстровано за тиждень:</b> {{ data.users_registered_week }} <br>
+          </div>
+          <div class="col-md-6">
+            <b>Активних за сьогодні:</b> {{ data.active_today_users_count }} {% if data.active_today_users_count %}({{ (data.active_today_users_count / data.all_users_count * 100)|round(1, 'floor') }}%){% endif %}<br>
+            <b>Активних за вчора:</b> {{ data.active_yesterday_users_count }} {% if data.active_today_users_count %}({{ (data.active_yesterday_users_count / data.all_users_count * 100)|round(1, 'floor') }}%){% endif %}<br>
+            <b>Активних за тиждень:</b> {{ data.active_week_users_count }} {% if data.active_today_users_count %}({{ (data.active_week_users_count / data.all_users_count * 100)|round(1, 'floor') }}%){% endif %}<br>
+
+          </div>
+        </div>
+        <br><br><hr>
+        <div class="row">
+<!--
+          <div class="col-md-12 col-sm-12">
+            <canvas id="requests-on-hours" height="110px;"></canvas>
+          </div>
+          <br>
+-->
+         <div class="col-md-6 col-sm-12">
+            <canvas id="requests-types-chart"></canvas>
+          </div>
+          
+          <div class="col-md-6 col-sm-12">
+            <canvas id="requests-on-days"></canvas>
+          </div>
+        </div>
+          
+          <br><hr>
+      <div class="row">
+          <div class="col-md-6 col-sm-12">
+            <h4>Оновлення викладачів</h4>
+            <div>Останнє оновлення: {{data.teachers_update_time}}</div>
+             <a class="btn btn-info" href="/fl1/update_teachers" role="button" target="_blank">Оновити</a>
+          </div><br>
+         <div class="col-md-6 col-sm-12">
+            <h4>Оновлення груп</h4>
+            <div>Останнє оновлення: {{data.groups_update_time}}</div>
+             <a class="btn btn-info" href="/fl1/update_groups" role="button" target="_blank">Оновити</a>
+          </div>
+          
+          <div class="col-md-6 col-sm-12">
+            <canvas id="requests-on-days"></canvas>
+          </div>
+        </div>
+          
+      </div>
+    
+{% endblock %}
+
+{% block js %}
+    <script src="{{ url_for('static', filename = 'js/requests-types-chart.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/requests_on_hours.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/requests-on-days.js') }}"></script>
+{% endblock %}

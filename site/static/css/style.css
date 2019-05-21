@@ -1,0 +1,14 @@
+.content{
+  margin-top: 30px;
+}
+.header {
+  background-color: #31de45;
+  color: #F2F2F2;
+  border-radius: 15px;
+}
+.brand-title{
+  font-weight: bold;
+}
+div.header > ul > a{
+color: #F2F2F2;
+}
