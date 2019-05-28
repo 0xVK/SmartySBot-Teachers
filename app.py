@@ -57,7 +57,8 @@ def get_timetable(faculty='', teacher='', group='', sdate='', edate='', user_id=
         page = requests.post(settings.TIMETABLE_URL, post_data, headers=http_headers, timeout=15)
     except Exception as ex:
         core.log(m='Error with Dekanat site connection: {}'.format(str(ex)))
-        bot.send_message(user_id, 'Помилка з\'єднання із сайтом Деканату. Спробуйте пізніше.', reply_markup=keyboard)
+        if user_id:
+            bot.send_message(user_id, 'Помилка з\'єднання із сайтом Деканату. Спробуйте пізніше.', reply_markup=keyboard)
         return False
 
     parsed_page = BeautifulSoup(page.content, 'html5lib')
@@ -134,6 +135,19 @@ def clear_cache(message):
     core.Cache.clear_cache()
 
     bot.send_message(user.get_id(), 'The cache has been successfully cleaned.')
+
+
+@bot.message_handler(commands=['ca'])
+def clear_cache_audiences(message):
+
+    user = core.User(message.chat)
+
+    if str(user.get_id()) not in settings.ADMINS_ID:
+        return
+
+    core.clear_cache_audiences()
+
+    bot.send_message(user.get_id(), 'The audiences cache has been successfully cleaned.')
 
 
 @bot.message_handler(commands=['log'])
@@ -378,6 +392,81 @@ def show_other_group(message):
     bot.send_message(message.chat.id, timetable_for_week[:4090], parse_mode='HTML', reply_markup=keyboard)
 
 
+def show_in_audience(message):
+
+    if message.text == KEYBOARD['MAIN_MENU']:
+
+        bot.send_message(message.chat.id, 'Ok', reply_markup=keyboard)
+
+        return
+
+    audience_number = message.text
+
+    raw_lessons = core.get_lesson_in_audience(audience_number) or []
+    lessons = {}
+
+    for lesson in raw_lessons:
+        lessons[lesson[0]] = {
+            't_group': lesson[1],
+            't_lesson': lesson[2],
+        }
+
+    day_timetable = '.....::::: \U0001F4CB Пари для <b>{}</b> ауд. :::::.....\n\n'.format(audience_number)
+
+    start_index = 1
+    end_index = 7
+
+    timetable = ['9:00 - 10:20', '10:30 - 11:50', '12:10 - 13:30', '13:40 - 15:00',
+                 '15:20 - 16:40 ', '16:50 - 18:10', '18:20 - 19:40', '-']
+
+    for i in range(start_index, end_index + 1):
+        if lessons.get(str(i)):
+            day_timetable += '{} <i>{}</i> \n<b>{}</b> > {}\n\n'.format(emoji_numbers[i], timetable[i-1],
+                                                                        lessons.get(str(i)).get('t_group'),
+                                                                        lessons.get(str(i)).get('t_lesson'))
+        else:
+            day_timetable += '{} <i>{}</i>\nВікно.\n\n'.format(emoji_numbers[i], timetable[i-1])
+
+    bot.send_message(chat_id=message.chat.id, text=day_timetable, parse_mode='HTML', reply_markup=keyboard)
+
+
+@app.route('/fl1/update_timetable_for_audiences')
+def update_timetable_for_audiences():
+
+    bot.send_message('204560928', 'Запущено пошук пар по аудиторіям.', reply_markup=keyboard)
+    core.log(m='Запущено пошук пар по аудиторіям.')
+
+    core.clear_audience_timetables()
+
+    all_groups = core.update_all_groups()
+
+    added_groups = 0
+
+    for group in all_groups:
+
+        lessons = get_timetable(group=group)
+
+        if not lessons:
+            continue
+
+        for lesson in enumerate(lessons[0]['lessons'], 1):
+
+            # 210/№1 Агапов Ю.Ю. Педагогіка та історія педагогіки (КтР)
+            rez = core.check_lesson(lesson[1])
+            if rez:
+                for les in rez:
+                    if les.get('lesson_audience') in ['319', '320', '321', '322',
+                                                      '323', '324', '325', '326', '327', '328']:
+                        added_groups += 1
+
+                        core.add_lesson(lesson[0], group, les.get('lesson_name'), les.get('lesson_audience'))
+
+    core.log(m='Розклад проаналізовано. Додано {} пар.'.format(added_groups))
+    m = 'Розклад проаналізовано. Додано {} пар.'.format(added_groups)
+    bot.send_message('204560928', m, reply_markup=keyboard)
+    return 'ok'
+
+
 @app.route('/fl1/metrics')
 def admin_metrics():
 
@@ -545,6 +634,7 @@ def admin_user_statistics(user_id):
 def index():
     core.User.create_user_table_if_not_exists()
     core.MetricsManager.create_metrics_table_if_not_exists()
+    core.create_audience_db_if_not_exists()
     bot.delete_webhook()
     bot.set_webhook(settings.WEBHOOK_URL + settings.WEBHOOK_PATH, max_connections=1)
     bot.send_message('204560928', 'Running...')
@@ -720,6 +810,20 @@ def main_menu(message):
                                     'введіть його прізвище.')
             bot.register_next_step_handler(sent, select_teachers)
 
+        elif request == KEYBOARD['FOR_A_AUDIENCE']:
+
+            msg = 'Для того щоб подивитись розклад у аудиторії - виберіть потрібну із списку:'
+
+            kb = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+            kb.row(KEYBOARD['MAIN_MENU'])
+            kb.row('319', '320', '321')
+            kb.row('323', '324', '325')
+            kb.row('326', '327', '328')
+
+            sent = bot.send_message(message.chat.id, msg, reply_markup=kb)
+            bot.register_next_step_handler(sent, show_in_audience)
+
         elif re.search(r'^(\d{1,2})\.(\d{1,2})$', request):
 
             date = request + '.' + str(datetime.date.today().year)
@@ -822,6 +926,7 @@ def main():
     core.User.create_user_table_if_not_exists()
     core.Cache.create_cache_table_if_not_exists()
     core.MetricsManager.create_metrics_table_if_not_exists()
+    core.create_audience_db_if_not_exists()
 
     bot.delete_webhook()
 
@@ -854,4 +959,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #app.run(debug=True)
+    app.run(debug=True)

@@ -424,3 +424,79 @@ def update_all_teachers():
         file.write(json.dumps(teachers, sort_keys=True, ensure_ascii=False, separators=(',', ':'), indent=2))
 
     return teachers
+
+
+def create_audience_db_if_not_exists():
+
+    query = """CREATE TABLE IF NOT EXISTS timetable(
+                  t_row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  t_lesson_number TEXT,
+                  t_group TEXT,
+                  t_lesson TEXT,
+                  t_audience TEXT)"""
+
+    return DBManager.execute_query(query)
+
+
+def add_lesson(number=None, group='', lesson='', audience=None):
+
+    query = """INSERT INTO timetable(
+                                     t_lesson_number, 
+                                     t_group,
+                                     t_lesson,
+                                     t_audience
+                                     ) VALUES (?, ?, ?, ?)"""
+
+    return DBManager.execute_query(query, (number, group, lesson, audience))
+
+
+def check_lesson(lsn):
+
+    l = []
+
+    if lsn.count('/№1') == 1:
+
+        l.append({
+            'lesson_audience': lsn.split('/')[0],
+            'lesson_name': lsn[7:],
+        })
+
+    elif lsn.count('/№1') == 2:
+
+        positions = [m.start() for m in re.finditer('/№1', lsn)]
+
+        l.append({
+            'lesson_audience': lsn.split('/')[0],
+            'lesson_name': lsn[7:positions[1]-4],
+        })
+
+        sec_group = lsn[positions[1]-3:]
+
+        l.append({
+            'lesson_audience': sec_group.split('/')[0],
+            'lesson_name': sec_group[7:positions[1]-2],
+        })
+
+    return l
+
+
+def get_lesson_in_audience(audience=''):
+
+    query = """SELECT t_lesson_number, t_group, t_lesson  
+               FROM timetable
+               WHERE t_audience = ?
+               ORDER BY t_lesson_number"""
+
+    return DBManager.execute_query(query, (audience, ))
+
+
+def clear_audience_timetables():
+
+    query = "DELETE FROM timetable"
+    DBManager.execute_query(query, )
+
+
+def clear_cache_audiences():
+
+    query = "DELETE FROM timetable"
+    return DBManager.execute_query(query, )
