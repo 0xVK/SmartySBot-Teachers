@@ -48,6 +48,7 @@ KEYBOARD = {
     'TODAY': '\U0001F4D8 Сьогодні',
     'TOMORROW': '\U0001F4D9 Завтра',
     'FOR_A_WEEK': '\U0001F4DA Тиждень',
+    'FOR_A_AUDIENCE': '\U0001f6f8 По аудиторії',
     'FOR_A_TEACHER': '\U0001F464 По викладачу',
     'TIMETABLE': '\U0001F552 Час пар',
     'FOR_A_GROUP': '\U0001F465 По групі',
