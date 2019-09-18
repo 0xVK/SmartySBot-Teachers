@@ -42,7 +42,7 @@ def get_timetable(faculty='', teacher='', group='', sdate='', edate='', user_id=
             'n': 700,
         }
     except Exception as ex:
-        core.log(m='Error encoding request parameters: {}'.format(str(ex)))
+        core.log(m='Помилка кодування параметрів запиту до сайту деканату: {}'.format(str(ex)))
         bot.send_message(user_id, 'Помилка надсилання запиту, вкажіть коректні параметри.', reply_markup=keyboard)
         return False
 
@@ -56,7 +56,7 @@ def get_timetable(faculty='', teacher='', group='', sdate='', edate='', user_id=
     try:
         page = requests.post(settings.TIMETABLE_URL, post_data, headers=http_headers, timeout=15)
     except Exception as ex:
-        core.log(m='Error with Dekanat site connection: {}'.format(str(ex)))
+        core.log(m='Помилка з\'єднання із сайтом деканату: {}'.format(str(ex)))
         if user_id:
             bot.send_message(user_id, 'Помилка з\'єднання із сайтом Деканату. Спробуйте пізніше.', reply_markup=keyboard)
         return False
@@ -134,7 +134,7 @@ def clear_cache(message):
 
     core.Cache.clear_cache()
 
-    bot.send_message(user.get_id(), 'The cache has been successfully cleaned.')
+    bot.send_message(user.get_id(), 'Кеш пар був очищений.')
 
 
 @bot.message_handler(commands=['ca'])
@@ -147,7 +147,7 @@ def clear_cache_audiences(message):
 
     core.clear_cache_audiences()
 
-    bot.send_message(user.get_id(), 'The audiences cache has been successfully cleaned.')
+    bot.send_message(user.get_id(), 'Кеш розкладу по аудиторіям був очищений.')
 
 
 @bot.message_handler(commands=['log'])
@@ -245,9 +245,10 @@ def set_name(message):
         with open(os.path.join(settings.BASE_DIR, 'teachers.txt'), 'r', encoding="utf-8") as file:
             all_teachers = json.loads(file.read())
     except Exception as ex:
-        bot.send_message(message.chat.id, 'Під час роботи виникла помилка. За допомогою зверніться до @koocherov',
+        bot.send_message('204560928', 'Помилка в роботі бота. Можливо відсутній файл із викладачами.')
+        bot.send_message(message.chat.id, 'Під час роботи виникла помилка. Розробник отримав сповіщення.',
                          reply_markup=keyboard)
-        core.log(m='Error loading teachers file: {}'.format(str(ex)))
+        core.log(m='Помилка завантаження файлу із викладачами: {}'.format(str(ex)))
         return
 
     for teacher in all_teachers:
@@ -933,10 +934,10 @@ def main():
     if settings.USE_WEBHOOK:
         try:
             bot.set_webhook(settings.WEBHOOK_URL + settings.WEBHOOK_PATH, max_connections=1)
-            core.log(m='Webhook is setting: {}'.format(bot.get_webhook_info().url))
+            core.log(m='Вебхук встановлено: {}'.format(bot.get_webhook_info().url))
 
         except Exception as ex:
-            core.log(m='Error while setting webhook: {}'.format(str(ex)))
+            core.log(m='Помилка при устіновці веб хука: {}'.format(str(ex)))
 
     try:
         core.log(m='Running..')
@@ -944,14 +945,14 @@ def main():
 
     except Exception as ex:
 
-        core.log(m='Working error: {}\n'.format(str(ex)))
+        core.log(m='Помилка під час роботи: {}\n'.format(str(ex)))
         bot.stop_polling()
 
         if settings.SEND_ERRORS_TO_ADMIN:
             for admin in settings.ADMINS_ID:
                 data = {
                     'chat_id': admin,
-                    'text': 'Something go wrong.\nError: {}'.format(str(ex))
+                    'text': 'Щось пішло не так.\n {}'.format(str(ex))
                 }
 
                 requests.get('https://api.telegram.org/bot{}/sendMessage'.format(settings.BOT_TOKEN), params=data)
