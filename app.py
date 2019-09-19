@@ -206,6 +206,8 @@ def week_schedule_handler(call_back):
         for timetable_day in timetable_data:
             timetable_for_week += render_day_timetable(timetable_day)
 
+        bot.delete_message(chat_id=user.get_id(), message_id=call_back.message.message_id)
+
     elif isinstance(timetable_data, list) and not len(timetable_data):
         bot.delete_message(chat_id=user.get_id(), message_id=call_back.message.message_id)
         timetable_for_week = "На тиждень пар не знайдено."
@@ -213,7 +215,6 @@ def week_schedule_handler(call_back):
     else:
         return
 
-    bot.delete_message(chat_id=user.get_id(), message_id=call_back.message.message_id)
     bot.send_message(text=timetable_for_week[:4090], chat_id=user.get_id(),
                      parse_mode="HTML", reply_markup=keyboard)
 
@@ -456,8 +457,7 @@ def update_timetable_for_audiences():
             rez = core.check_lesson(lesson[1])
             if rez:
                 for les in rez:
-                    if les.get('lesson_audience') in ['319', '320', '321', '322',
-                                                      '323', '324', '325', '326', '327', '328']:
+                    if les.get('lesson_audience') in ('319', '320', '321', '323', '324', '325', '326', '327', '328'):
                         added_groups += 1
 
                         core.add_lesson(lesson[0], group, les.get('lesson_name'), les.get('lesson_audience'))
@@ -794,59 +794,63 @@ def main_menu(message):
             now_time = datetime.datetime.now().time()
 
             lessons_time = ({
-                                'start_time': (9, 0),
-                                'end_time': (10, 20)
-                            },
-                            {
-                                'start_time': (10, 30),
-                                'end_time': (11, 50)
-                            },
-                            {
-                                'start_time': (12, 10),
-                                'end_time': (13, 30)
-                            },
-                            {
-                                'start_time': (13, 40),
-                                'end_time': (15, 0)
-                            },
-                            {
-                                'start_time': (15, 20),
-                                'end_time': (16, 40)
-                            },
-                            {
-                                'start_time': (16, 50),
-                                'end_time': (18, 10)
-                            },
-                            {
-                                'start_time': (18, 20),
-                                'end_time': (19, 40)
-                            },
+                    'start_time': (9, 0),
+                    'end_time': (10, 20)
+                },
+                {
+                    'start_time': (10, 30),
+                    'end_time': (11, 50)
+                },
+                {
+                    'start_time': (12, 10),
+                    'end_time': (13, 30)
+                },
+                {
+                    'start_time': (13, 40),
+                    'end_time': (15, 0)
+                },
+                {
+                    'start_time': (15, 20),
+                    'end_time': (16, 40)
+                },
+                {
+                    'start_time': (16, 50),
+                    'end_time': (18, 10)
+                },
+                {
+                    'start_time': (18, 20),
+                    'end_time': (19, 40)
+                },
             )
 
             breaks_time = ({
-                               'start_time': (10, 20),
-                               'end_time': (10, 30)
-                           },
-                           {
-                               'start_time': (11, 50),
-                               'end_time': (12, 10)
-                           },
-                           {
-                               'start_time': (13, 30),
-                               'end_time': (13, 40)
-                           },
-                           {
-                               'start_time': (15, 00),
-                               'end_time': (15, 20)
-                           },
-                           {
-                               'start_time': (16, 40),
-                               'end_time': (16, 50)
-                           },
-                           {
-                               'start_time': (18, 10),
-                               'end_time': (18, 20)
-                           },
+                   'start_time': (8, 0),
+                   'end_time': (9, 0)
+               },
+                {
+                   'start_time': (10, 20),
+                   'end_time': (10, 30)
+               },
+               {
+                   'start_time': (11, 50),
+                   'end_time': (12, 10)
+               },
+               {
+                   'start_time': (13, 30),
+                   'end_time': (13, 40)
+               },
+               {
+                   'start_time': (15, 00),
+                   'end_time': (15, 20)
+               },
+               {
+                   'start_time': (16, 40),
+                   'end_time': (16, 50)
+               },
+               {
+                   'start_time': (18, 10),
+                   'end_time': (18, 20)
+               },
             )
 
             current_lesson = 0
@@ -860,8 +864,11 @@ def main_menu(message):
             else:
                 for i, _break in enumerate(breaks_time):
                     if datetime.time(*_break['start_time']) <= now_time <= datetime.time(*_break['end_time']):
-                        current_break = i + 1
+                        current_break = i
                         break
+                else:
+                    bot.send_message(message.chat.id, 'Час відпочивати.', parse_mode='HTML', reply_markup=keyboard)
+                    return
 
             msg = ''
             show_for_lesson = 0
@@ -886,7 +893,6 @@ def main_menu(message):
                     msg += 'Вікно\n\n'
 
             bot.send_message(message.chat.id, msg, parse_mode='HTML', reply_markup=keyboard)
-
 
         elif request == KEYBOARD['FOR_A_TEACHER']:
 
