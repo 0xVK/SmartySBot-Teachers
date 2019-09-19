@@ -480,14 +480,16 @@ def check_lesson(lsn):
     return l
 
 
-def get_lesson_in_audience(audience=''):
+def get_lesson_in_audience(audience='', lesson = 0):
 
-    query = """SELECT t_lesson_number, t_group, t_lesson  
-               FROM timetable
-               WHERE t_audience = ?
-               ORDER BY t_lesson_number"""
+    query = "SELECT t_lesson_number, t_group, t_lesson FROM timetable WHERE t_audience = ? "
 
-    return DBManager.execute_query(query, (audience, ))
+    if lesson:
+        query += " AND t_lesson_number = {} ".format(lesson)
+
+    query += " ORDER BY t_lesson_number"
+
+    return DBManager.execute_query(query, (audience,))
 
 
 def clear_audience_timetables():

@@ -20,7 +20,7 @@ bot = telebot.TeleBot(settings.BOT_TOKEN, threaded=True)
 keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 keyboard.row(KEYBOARD['TODAY'], KEYBOARD['TOMORROW'], KEYBOARD['FOR_A_WEEK'])
 keyboard.row(KEYBOARD['FOR_A_TEACHER'], KEYBOARD['FOR_A_AUDIENCE'], KEYBOARD['FOR_A_GROUP'])
-keyboard.row(KEYBOARD['TIMETABLE'], KEYBOARD['WEATHER'], KEYBOARD['HELP'])
+keyboard.row(KEYBOARD['TIMETABLE'], KEYBOARD['IN_AUDIENCE'], KEYBOARD['HELP'])
 
 emoji_numbers = ['0⃣', '1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']
 
@@ -773,15 +773,15 @@ def main_menu(message):
 
             msg = "Для пошуку по датам : <b>15.05</b>, <b>15.05-22.05</b>, <b>1.1.18-10.1.18</b>\n\n" \
                   "<b>Ім`я:</b> <code> {}</code>\n\n" \
-                  "<b>Версія:</b> {}\n" \
                   "<b>Канал:</b> @zdu_news\n" \
+                  "<b>Новини університету:</b> @zueduua\n" \
                   "<b>Розробник:</b> @Koocherov\n"
 
             kb = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
             kb.row(KEYBOARD['MAIN_MENU'])
             kb.row(KEYBOARD['CHANGE_NAME'])
 
-            bot.send_message(message.chat.id, msg.format(user.get_full_name(), settings.VERSION),
+            bot.send_message(message.chat.id, msg.format(user.get_full_name()),
                              reply_markup=kb, parse_mode='HTML')
 
         elif request == KEYBOARD['FOR_A_GROUP']:
@@ -789,20 +789,104 @@ def main_menu(message):
                                     'Для того щоб подивитись розклад будь якої групи на тиждень введіть її назву')
             bot.register_next_step_handler(sent, show_other_group)
 
-        elif request == KEYBOARD['WEATHER']:
+        elif request == KEYBOARD['IN_AUDIENCE']:
 
-            try:
+            now_time = datetime.datetime.now().time()
 
-                weather_manager = WeatherManager()
-                weather_manager.process_weather()
+            lessons_time = ({
+                                'start_time': (9, 0),
+                                'end_time': (10, 20)
+                            },
+                            {
+                                'start_time': (10, 30),
+                                'end_time': (11, 50)
+                            },
+                            {
+                                'start_time': (12, 10),
+                                'end_time': (13, 30)
+                            },
+                            {
+                                'start_time': (13, 40),
+                                'end_time': (15, 0)
+                            },
+                            {
+                                'start_time': (15, 20),
+                                'end_time': (16, 40)
+                            },
+                            {
+                                'start_time': (16, 50),
+                                'end_time': (18, 10)
+                            },
+                            {
+                                'start_time': (18, 20),
+                                'end_time': (19, 40)
+                            },
+            )
 
-                with open(os.path.join(settings.BASE_DIR, 'forecast.txt'), 'r', encoding="utf-8") as forecast_file:
-                    forecast = forecast_file.read()
+            breaks_time = ({
+                               'start_time': (10, 20),
+                               'end_time': (10, 30)
+                           },
+                           {
+                               'start_time': (11, 50),
+                               'end_time': (12, 10)
+                           },
+                           {
+                               'start_time': (13, 30),
+                               'end_time': (13, 40)
+                           },
+                           {
+                               'start_time': (15, 00),
+                               'end_time': (15, 20)
+                           },
+                           {
+                               'start_time': (16, 40),
+                               'end_time': (16, 50)
+                           },
+                           {
+                               'start_time': (18, 10),
+                               'end_time': (18, 20)
+                           },
+            )
 
-                bot.send_message(message.chat.id, forecast, reply_markup=keyboard, parse_mode='HTML')
+            current_lesson = 0
+            current_break = 0
 
-            except Exception:
-                bot.send_message(message.chat.id, 'Погоду не завантажено.', reply_markup=keyboard, parse_mode='HTML')
+            for i, lesson in enumerate(lessons_time):
+                if datetime.time(*lesson['start_time']) <= now_time <= datetime.time(*lesson['end_time']):
+                    current_lesson = i + 1
+                    break
+
+            else:
+                for i, _break in enumerate(breaks_time):
+                    if datetime.time(*_break['start_time']) <= now_time <= datetime.time(*_break['end_time']):
+                        current_break = i + 1
+                        break
+
+            msg = ''
+            show_for_lesson = 0
+
+            if current_lesson:
+                msg = '\U0001F550 Зараз {} пара.'.format(current_lesson)
+                show_for_lesson = current_lesson
+            elif current_break:
+                msg = '\U0001F6B6 Зараз перерва, далі {} пара'.format(current_break + 1)
+                show_for_lesson = current_break + 1
+
+
+            msg += '\n\n'
+
+            for audience in ('319', '320', '321','323', '324', '325', '326', '327', '328'):
+                raw_lesson = core.get_lesson_in_audience(audience, show_for_lesson) or []
+
+                msg += '\U0001F4BB <b>{}</b>\n'.format(audience)
+                if raw_lesson:
+                    msg += '<b>{}</b> > {}\n\n'.format(raw_lesson[0][1], raw_lesson[0][2])
+                else:
+                    msg += 'Вікно\n\n'
+
+            bot.send_message(message.chat.id, msg, parse_mode='HTML', reply_markup=keyboard)
+
 
         elif request == KEYBOARD['FOR_A_TEACHER']:
 

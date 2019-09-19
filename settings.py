@@ -20,7 +20,7 @@ POLLING_INTERVAL = 1
 USE_CACHE = False
 
 # Use webhook instead polling
-USE_WEBHOOK = 0
+USE_WEBHOOK = True
 
 # Address bot running. For example https://mydomain.com
 WEBHOOK_URL = '<URL>'
@@ -52,7 +52,7 @@ KEYBOARD = {
     'FOR_A_TEACHER': '\U0001F464 По викладачу',
     'TIMETABLE': '\U0001F552 Час пар',
     'FOR_A_GROUP': '\U0001F465 По групі',
-    'WEATHER': '\U0001F30D Погода',
+    'IN_AUDIENCE': '\U0001F4BB',
     'HELP': '\U0001F4AC Довідка',
 
     'CHANGE_NAME': '\U00002699 Зм. прізвище',
