@@ -886,11 +886,9 @@ def main_menu(message):
             for audience in ('319', '320', '321','323', '324', '325', '326', '327', '328'):
                 raw_lesson = core.get_lesson_in_audience(audience, show_for_lesson) or []
 
-                msg += '\U0001F4BB <b>{}</b>\n'.format(audience)
                 if raw_lesson:
+                    msg += '\U0001F4BB <b>{}</b>\n'.format(audience)
                     msg += '<b>{}</b> > {}\n\n'.format(raw_lesson[0][1], raw_lesson[0][2])
-                else:
-                    msg += 'Вікно\n\n'
 
             bot.send_message(message.chat.id, msg, parse_mode='HTML', reply_markup=keyboard)
 
