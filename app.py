@@ -156,14 +156,20 @@ def get_logs(message):
     user = core.User(message.chat)
 
     if str(user.get_id()) not in settings.ADMINS_ID:
+        bot.send_message(user.get_id(), 'Немає доступу :(')
         return
+
+    if len(message.text.split()) == 2:
+        count = int(message.text.split()[1])
+    else:
+        count = 65
 
     with open(os.path.join(settings.BASE_DIR, 'bot_log.txt'), 'r', encoding="utf-8") as log_file:
         log_lines = log_file.readlines()
 
     logs = ''
 
-    for line in log_lines[-65:]:
+    for line in log_lines[-count:]:
         logs += line
 
     bot.send_message(user.get_id(), logs, reply_markup=keyboard)
@@ -879,7 +885,6 @@ def main_menu(message):
             elif current_break:
                 msg = '\U0001F6B6 Зараз перерва, далі {} пара'.format(current_break + 1)
                 show_for_lesson = current_break + 1
-
 
             msg += '\n\n'
 
