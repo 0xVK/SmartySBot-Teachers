@@ -452,32 +452,34 @@ def add_lesson(number=None, group='', lesson='', audience=None):
 
 def check_lesson(lsn):
 
-    l = []
+    lessons_list = []
 
-    if lsn.count('/№1') == 1:
+    if lsn.count('/№') == 1:
 
-        l.append({
-            'lesson_audience': lsn.split('/')[0],
-            'lesson_name': lsn[7:],
-        })
+        if lsn[5] == '1':
+            lessons_list.append({
+                'lesson_audience': lsn.split('/')[0],
+                'lesson_name': lsn[7:],
+            })
 
-    elif lsn.count('/№1') == 2:
+    elif lsn.count('/№') == 2:
+        positions = [m.start() for m in re.finditer('/№', lsn)]
 
-        positions = [m.start() for m in re.finditer('/№1', lsn)]
+        if lsn[5] == '1':
+            lessons_list.append({
+                'lesson_audience': lsn.split('/')[0],
+                'lesson_name': lsn[7:positions[1]-4],
+            })
 
-        l.append({
-            'lesson_audience': lsn.split('/')[0],
-            'lesson_name': lsn[7:positions[1]-4],
-        })
+        if lsn[positions[1]+2] == '1':
+            sec_group = lsn[positions[1]-3:]
 
-        sec_group = lsn[positions[1]-3:]
+            lessons_list.append({
+                'lesson_audience': sec_group.split('/')[0],
+                'lesson_name': sec_group[7:positions[1]-2],
+            })
 
-        l.append({
-            'lesson_audience': sec_group.split('/')[0],
-            'lesson_name': sec_group[7:positions[1]-2],
-        })
-
-    return l
+    return lessons_list
 
 
 def get_lesson_in_audience(audience='', lesson=0):
