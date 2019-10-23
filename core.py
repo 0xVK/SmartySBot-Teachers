@@ -480,7 +480,7 @@ def check_lesson(lsn):
     return l
 
 
-def get_lesson_in_audience(audience='', lesson = 0):
+def get_lesson_in_audience(audience='', lesson=0):
 
     query = "SELECT t_lesson_number, t_group, t_lesson FROM timetable WHERE t_audience = ? "
 

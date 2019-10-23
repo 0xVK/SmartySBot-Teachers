@@ -860,7 +860,7 @@ def main_menu(message):
             )
 
             current_lesson = 0
-            current_break = 0
+            current_break = -1
 
             for i, lesson in enumerate(lessons_time):
                 if datetime.time(*lesson['start_time']) <= now_time <= datetime.time(*lesson['end_time']):
@@ -882,7 +882,7 @@ def main_menu(message):
             if current_lesson:
                 msg = '\U0001F550 Зараз {} пара.'.format(current_lesson)
                 show_for_lesson = current_lesson
-            elif current_break:
+            elif current_break >= 0:
                 msg = '\U0001F6B6 Зараз перерва, далі {} пара'.format(current_break + 1)
                 show_for_lesson = current_break + 1
 
