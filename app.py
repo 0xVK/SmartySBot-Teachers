@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
 import requests
@@ -6,6 +7,7 @@ import datetime
 import os
 import settings
 import core
+import sys
 import re
 import json
 import copy
@@ -403,37 +405,43 @@ def show_other_group(message):
 def show_in_audience(message):
 
     if message.text == KEYBOARD['MAIN_MENU']:
-
         bot.send_message(message.chat.id, 'Ok', reply_markup=keyboard)
-
         return
 
-    audience_number = message.text
+    audience_numbers_list = []
+    day_timetable = ''
 
-    raw_lessons = core.get_lesson_in_audience(audience_number) or []
-    lessons = {}
+    if message.text == 'Всі':
+        audience_numbers_list = settings.AUDIENCES_TO_CACHE_LESSONS
+    else:
+        audience_numbers_list.append(message.text)
 
-    for lesson in raw_lessons:
-        lessons[lesson[0]] = {
-            't_group': lesson[1],
-            't_lesson': lesson[2],
-        }
+    for audience_number in audience_numbers_list:
 
-    day_timetable = '.....::::: \U0001F4CB Пари для <b>{}</b> ауд. :::::.....\n\n'.format(audience_number)
+        raw_lessons = core.get_lesson_in_audience(audience_number) or []
+        lessons = {}
 
-    start_index = 1
-    end_index = 7
+        for lesson in raw_lessons:
+            lessons[lesson[0]] = {
+                't_group': lesson[1],
+                't_lesson': lesson[2],
+            }
 
-    timetable = ['9:00 - 10:20', '10:30 - 11:50', '12:10 - 13:30', '13:40 - 15:00',
-                 '15:20 - 16:40 ', '16:50 - 18:10', '18:20 - 19:40', '-']
+        day_timetable += '.....::::: \U0001F4CB Пари для <b>{}</b> ауд. :::::.....\n\n'.format(audience_number)
 
-    for i in range(start_index, end_index + 1):
-        if lessons.get(str(i)):
-            day_timetable += '{} <i>{}</i> \n<b>{}</b> > {}\n\n'.format(emoji_numbers[i], timetable[i-1],
-                                                                        lessons.get(str(i)).get('t_group'),
-                                                                        lessons.get(str(i)).get('t_lesson'))
-        else:
-            day_timetable += '{} <i>{}</i>\nВікно.\n\n'.format(emoji_numbers[i], timetable[i-1])
+        start_index = 1
+        end_index = 7
+
+        timetable = ['9:00 - 10:20', '10:30 - 11:50', '12:10 - 13:30', '13:40 - 15:00',
+                     '15:20 - 16:40 ', '16:50 - 18:10', '18:20 - 19:40', '-']
+
+        for i in range(start_index, end_index + 1):
+            if lessons.get(str(i)):
+                day_timetable += '{} <i>{}</i> \n<b>{}</b> > {}\n\n'.format(emoji_numbers[i], timetable[i-1],
+                                                                            lessons.get(str(i)).get('t_group'),
+                                                                            lessons.get(str(i)).get('t_lesson'))
+            else:
+                day_timetable += '{} <i>{}</i>\nВікно.\n\n'.format(emoji_numbers[i], timetable[i-1])
 
     bot.send_message(chat_id=message.chat.id, text=day_timetable, parse_mode='HTML', reply_markup=keyboard)
 
@@ -463,7 +471,7 @@ def update_timetable_for_audiences():
             rez = core.check_lesson(lesson[1])
             if rez:
                 for les in rez:
-                    if les.get('lesson_audience') in ('319', '320', '321', '323', '324', '325', '326', '327', '328'):
+                    if les.get('lesson_audience') in settings.AUDIENCES_TO_CACHE_LESSONS:
                         added_groups += 1
 
                         core.add_lesson(lesson[0], group, les.get('lesson_name'), les.get('lesson_audience'))
@@ -910,7 +918,7 @@ def main_menu(message):
 
             kb = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
-            kb.row(KEYBOARD['MAIN_MENU'])
+            kb.row(KEYBOARD['MAIN_MENU'], 'Всі')
             kb.row('319', '320', '321')
             kb.row('323', '324', '325')
             kb.row('326', '327', '328')
@@ -1052,5 +1060,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    app.run(debug=True)
+    app.run(debug=True) if len(sys.argv) > 1 else main()
