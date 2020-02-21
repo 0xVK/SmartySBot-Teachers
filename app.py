@@ -440,42 +440,6 @@ def show_in_audience(message):
     bot.send_message(chat_id=message.chat.id, text=day_timetable, parse_mode='HTML', reply_markup=keyboard)
 
 
-@app.route('/fl1/update_timetable_for_audiences')
-def update_timetable_for_audiences():
-
-    bot.send_message('204560928', 'Запущено пошук пар по аудиторіям.', reply_markup=keyboard)
-    core.log(m='Запущено пошук пар по аудиторіям.')
-
-    core.clear_audience_timetables()
-
-    all_groups = core.update_all_groups()
-
-    added_groups = 0
-
-    for group in all_groups:
-
-        lessons = get_timetable(group=group)
-
-        if not lessons:
-            continue
-
-        for lesson in enumerate(lessons[0]['lessons'], 1):
-
-            # 210/№1 Агапов Ю.Ю. Педагогіка та історія педагогіки (КтР)
-            rez = core.check_lesson(lesson[1])
-            # if rez:
-            #     for les in rez:
-            #         if les.get('lesson_audience') in settings.AUDIENCES_TO_CACHE_LESSONS:
-            #             added_groups += 1
-            #
-            #             core.add_lesson(lesson[0], group, les.get('lesson_name'), les.get('lesson_audience'))
-
-    core.log(m='Розклад проаналізовано. Додано {} пар.'.format(added_groups))
-    m = 'Розклад проаналізовано. Додано {} пар.'.format(added_groups)
-    bot.send_message('204560928', m, reply_markup=keyboard)
-    return 'ok'
-
-
 @app.route('/fl1/metrics')
 def admin_metrics():
 
