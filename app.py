@@ -21,8 +21,8 @@ bot = telebot.TeleBot(settings.BOT_TOKEN, threaded=True)
 
 keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 keyboard.row(KEYBOARD['TODAY'], KEYBOARD['TOMORROW'], KEYBOARD['FOR_A_WEEK'])
-keyboard.row(KEYBOARD['FOR_A_TEACHER'], KEYBOARD['FOR_A_AUDIENCE'], KEYBOARD['FOR_A_GROUP'])
-keyboard.row(KEYBOARD['TIMETABLE'], KEYBOARD['IN_AUDIENCE'], KEYBOARD['HELP'])
+keyboard.row(KEYBOARD['FOR_A_TEACHER'], KEYBOARD['FOR_A_GROUP'])
+keyboard.row(KEYBOARD['IN_AUDIENCE'], KEYBOARD['FOR_A_AUDIENCE'], KEYBOARD['HELP'])
 
 emoji_numbers = ['0⃣', '1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']
 
@@ -412,36 +412,30 @@ def show_in_audience(message):
     day_timetable = ''
 
     if message.text == 'Всі':
-        audience_numbers_list = settings.AUDIENCES_TO_CACHE_LESSONS
+        audience_numbers_list = ['113', '319', '320', '321', '323', '324', '325', '326', '327', '328']
     else:
         audience_numbers_list.append(message.text)
 
     for audience_number in audience_numbers_list:
 
-        raw_lessons = core.get_lesson_in_audience(audience_number) or []
-        lessons = {}
+        lessons = core.get_lesson_in_audience(audience_number)
 
-        for lesson in raw_lessons:
-            lessons[lesson[0]] = {
-                't_group': lesson[1],
-                't_lesson': lesson[2],
-            }
+        if not lessons:
+            continue
 
         day_timetable += '.....::::: \U0001F4CB Пари для <b>{}</b> ауд. :::::.....\n\n'.format(audience_number)
-
-        start_index = 1
-        end_index = 7
 
         timetable = ['9:00 - 10:20', '10:30 - 11:50', '12:10 - 13:30', '13:40 - 15:00',
                      '15:20 - 16:40 ', '16:50 - 18:10', '18:20 - 19:40', '-']
 
-        for i in range(start_index, end_index + 1):
-            if lessons.get(str(i)):
-                day_timetable += '{} <i>{}</i> \n<b>{}</b> > {}\n\n'.format(emoji_numbers[i], timetable[i-1],
-                                                                            lessons.get(str(i)).get('t_group'),
-                                                                            lessons.get(str(i)).get('t_lesson'))
-            else:
-                day_timetable += '{} <i>{}</i>\nВікно.\n\n'.format(emoji_numbers[i], timetable[i-1])
+        for lesson in lessons:
+            n = int(lesson['lesson_number'])
+            if lessons:
+                day_timetable += '{} {}\n<b>{}</b> ({}) > {} ({})\n\n'.format(emoji_numbers[n], timetable[n-1],
+                                                                              lesson['group'],
+                                                                              lesson['teacher'],
+                                                                              lesson['title'],
+                                                                              lesson['type'])
 
     bot.send_message(chat_id=message.chat.id, text=day_timetable, parse_mode='HTML', reply_markup=keyboard)
 
@@ -469,12 +463,12 @@ def update_timetable_for_audiences():
 
             # 210/№1 Агапов Ю.Ю. Педагогіка та історія педагогіки (КтР)
             rez = core.check_lesson(lesson[1])
-            if rez:
-                for les in rez:
-                    if les.get('lesson_audience') in settings.AUDIENCES_TO_CACHE_LESSONS:
-                        added_groups += 1
-
-                        core.add_lesson(lesson[0], group, les.get('lesson_name'), les.get('lesson_audience'))
+            # if rez:
+            #     for les in rez:
+            #         if les.get('lesson_audience') in settings.AUDIENCES_TO_CACHE_LESSONS:
+            #             added_groups += 1
+            #
+            #             core.add_lesson(lesson[0], group, les.get('lesson_name'), les.get('lesson_audience'))
 
     core.log(m='Розклад проаналізовано. Додано {} пар.'.format(added_groups))
     m = 'Розклад проаналізовано. Додано {} пар.'.format(added_groups)
@@ -896,12 +890,12 @@ def main_menu(message):
 
             msg += '\n\n'
 
-            for audience in ('319', '320', '321','323', '324', '325', '326', '327', '328'):
-                raw_lesson = core.get_lesson_in_audience(audience, show_for_lesson) or []
+            for audience in (319, 320, 321, 323, 324, 325, 326, 327, 328):
+                lesson = core.get_lesson_in_audience(audience, show_for_lesson)
 
-                if raw_lesson:
+                if lesson:
                     msg += '\U0001F4BB <b>{}</b>\n'.format(audience)
-                    msg += '<b>{}</b> > {}\n\n'.format(raw_lesson[0][1], raw_lesson[0][2])
+                    msg += '<b>{}</b> ({}) > {} ({})\n\n'.format(lesson['group'], lesson['teacher'], lesson['title'], lesson['type'])
 
             bot.send_message(message.chat.id, msg, parse_mode='HTML', reply_markup=keyboard)
 
@@ -918,7 +912,7 @@ def main_menu(message):
 
             kb = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
-            kb.row(KEYBOARD['MAIN_MENU'], 'Всі')
+            kb.row(KEYBOARD['MAIN_MENU'], '113', 'Всі')
             kb.row('319', '320', '321')
             kb.row('323', '324', '325')
             kb.row('326', '327', '328')

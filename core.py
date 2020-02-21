@@ -482,16 +482,60 @@ def check_lesson(lsn):
     return lessons_list
 
 
-def get_lesson_in_audience(audience='', lesson=0):
+def get_lesson_in_audience(audience_number=0, lesson_number=0):
 
-    query = "SELECT t_lesson_number, t_group, t_lesson FROM timetable WHERE t_audience = ? "
+    audience_number = int(audience_number)
 
-    if lesson:
-        query += " AND t_lesson_number = {} ".format(lesson)
+    rooms = {
+        113: 23,
+        319: 35,
+        320: 36,
+        321: 37,
+        323: 38,
+        324: 39,
+        325: 40,
+        326: 41,
+        327: 42,
+        328: 43,
+    }
 
-    query += " ORDER BY t_lesson_number"
+    today = datetime.date.today().strftime('%d.%m.%Y')
+    # today = '20.2.2020'
 
-    return DBManager.execute_query(query, (audience,))
+    try:
+        data = {
+            'req_type': 'rozklad',
+            'req_mode': 'room',
+            'OBJ_ID': rooms.get(audience_number, 0),
+            'OBJ_name': '',
+            'dep_name': '',
+            'ros_text': 'separated',
+            # 'show_empty': 'no',
+            'begin_date': today,
+            'end_date': today,
+            'req_format': 'json',
+            'coding_mode': 'UTF8',
+            'bs': 'ok',
+        }
+
+        # try:
+        r = requests.get('https://dekanat.zu.edu.ua/cgi-bin/timetable_export.cgi', params=data)
+
+        day_lessons = r.json().get('psrozklad_export', {}).get('roz_items', [])
+
+        for lesson in day_lessons:
+            if lesson_number:
+                if lesson['lesson_number'] == str(lesson_number):
+                    return lesson
+            else:
+                return day_lessons
+        else:
+            return []
+
+    except Exception as ex:
+
+        log(m='Помилка під час перегляду розкладу по аудиторіям.\n{}'.format(str(ex)))
+        return []
 
 
 def clear_audience_timetables():
