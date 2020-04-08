@@ -23,10 +23,13 @@ USE_CACHE = False
 USE_WEBHOOK = True
 
 # Address bot running. For example https://mydomain.com
-WEBHOOK_URL = '<URL>'
+WEBHOOK_URL = 'https://openbiblio.zu.edu.ua'
 
 # Path that telegram sends updates
 WEBHOOK_PATH = '/fl1/'
+
+# Export URL
+API_LINK = 'https://dekanat.zu.edu.ua/cgi-bin/timetable_export.cgi'
 
 # Timetable URL
 TIMETABLE_URL = 'https://dekanat.zu.edu.ua/cgi-bin/timetable.cgi'

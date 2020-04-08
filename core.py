@@ -357,6 +357,9 @@ def update_all_groups():
     with open(os.path.join(settings.BASE_DIR, 'groups.txt'), 'w', encoding="utf-8") as file:
         file.write(json.dumps(groups, sort_keys=True, ensure_ascii=False, separators=(',', ':'), indent=2))
 
+    with open(os.path.join(settings.BASE_DIR, 'valid_case_groups.txt'), 'w', encoding="utf-8") as file:
+        file.write(json.dumps(tmp_groups, sort_keys=True, ensure_ascii=False, separators=(',', ':'), indent=2))
+
     return groups
 
 
