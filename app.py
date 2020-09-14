@@ -200,8 +200,8 @@ def render_day_timetable(day_data):
             end_index = i
             break
 
-    timetable = ['9:00 - 10:20', '10:30 - 11:50', '12:10 - 13:30', '13:40 - 15:00',
-                 '15:20 - 16:40 ', '16:50 - 18:10', '18:20 - 19:40', '-']
+    timetable = ['8:00 - 9:20', '9:30 - 10:50', '11:00 - 12:20', '13:00 - 14:20',
+                 '14:30 - 15:50 ', '16:00 - 17:20', '17:30 - 18:50', '19:00 - 20:20']
     for i in range(start_index, end_index + 1):
         if lessons[i]:
             day_timetable += '{} <i>{}</i> \n{}\n\n'.format(emoji_numbers[i+1], timetable[i], lessons[i])
@@ -523,8 +523,7 @@ def show_in_audience(message):
 
         day_timetable += '.....::::: \U0001F4CB Пари для <b>{}</b> ауд. :::::.....\n\n'.format(audience_number)
 
-        timetable = ['9:00 - 10:20', '10:30 - 11:50', '12:10 - 13:30', '13:40 - 15:00',
-                     '15:20 - 16:40 ', '16:50 - 18:10', '18:20 - 19:40', '-']
+        timetable = ['8:00 - 9:20', '9:30 - 10:50', '11:00 - 12:20', '13:00 - 14:20', '14:30 - 15:50 ', '16:00 - 17:20', '17:30 - 18:50', '19:00 - 20:20']
 
         for lesson in lessons:
             n = int(lesson['lesson_number'])
@@ -819,13 +818,14 @@ def main_menu(message):
         elif request == KEYBOARD['TIMETABLE']:
 
             t = ''
-            t += '{} - 9:00 - 10:20\n'.format(emoji_numbers[1])
-            t += '{} - 10:30 - 11:50\n'.format(emoji_numbers[2])
-            t += '{} - 12:10 - 13:30\n'.format(emoji_numbers[3])
-            t += '{} - 13:40 - 15:00\n'.format(emoji_numbers[4])
-            t += '{} - 15:20 - 16:40 \n'.format(emoji_numbers[5])
-            t += '{} - 16:50 - 18:10 \n'.format(emoji_numbers[6])
-            t += '{} - 18:20 - 19:40 \n'.format(emoji_numbers[7])
+            t += '{} - 8:00 - 09:20\n'.format(emoji_numbers[1])
+            t += '{} - 9:30 - 10:50\n'.format(emoji_numbers[2])
+            t += '{} - 11:00 - 12:20\n'.format(emoji_numbers[3])
+            t += '{} - 13:00 - 14:20\n'.format(emoji_numbers[4])
+            t += '{} - 14:30 - 15:50 \n'.format(emoji_numbers[5])
+            t += '{} - 16:00 - 17:20 \n'.format(emoji_numbers[6])
+            t += '{} - 17:30 - 18:50 \n'.format(emoji_numbers[7])
+            t += '{} - 19:00 - 20:20 \n'.format(emoji_numbers[8])
 
             bot.send_message(user.get_id(), t, reply_markup=keyboard)
 
