@@ -199,8 +199,8 @@ def render_day_timetable(day_data):
             end_index = i
             break
 
-    timetable = ['8:00 - 9:20', '9:30 - 10:50', '11:00 - 12:20', '13:00 - 14:20',
-                 '14:30 - 15:50 ', '16:00 - 17:20', '17:30 - 18:50', '19:00 - 20:20']
+    timetable = ['8:00 - 9:20', '9:30 - 10:50', '11:10 - 12:30', '12:40 - 14:00',
+                 '14:10 - 15:30', '15:40 - 17:00', '17:10 - 18:30', '18:40 - 20:00']
     for i in range(start_index, end_index + 1):
         if lessons[i]:
             day_timetable += '{} <i>{}</i> \n{}\n\n'.format(emoji_numbers[i+1], timetable[i], lessons[i])
@@ -522,7 +522,8 @@ def show_in_audience(message):
 
         day_timetable += '.....::::: \U0001F4CB Пари для <b>{}</b> ауд. :::::.....\n\n'.format(audience_number)
 
-        timetable = ['8:00 - 9:20', '9:30 - 10:50', '11:00 - 12:20', '13:00 - 14:20', '14:30 - 15:50 ', '16:00 - 17:20', '17:30 - 18:50', '19:00 - 20:20']
+        timetable = ['8:00 - 9:20', '9:30 - 10:50', '11:10 - 12:30', '12:40 - 14:00',
+                     '14:10 - 15:30', '15:40 - 17:00', '17:10 - 18:30', '18:40 - 20:00']
 
         for lesson in lessons:
             n = int(lesson['lesson_number'])
@@ -785,10 +786,10 @@ def main_menu(message):
 
                 timetable_for_week = ''
                 today = datetime.date.today()
-                current_week_day_number = today.isoweekday()
-                diff_between_saturday_and_today = 6 - current_week_day_number
-                next_week_first_day = today + datetime.timedelta(days=diff_between_saturday_and_today + 2)
-                next_week_last_day = today + datetime.timedelta(days=diff_between_saturday_and_today + 7)
+                today_day_number = today.isoweekday()
+                diff_between_sunday_and_today = 7 - today_day_number
+                next_week_first_day = today + datetime.timedelta(days=diff_between_sunday_and_today + 1)
+                next_week_last_day = today + datetime.timedelta(days=diff_between_sunday_and_today + 7)
 
                 timetable_data = get_timetable(teacher=user_name, sdate=next_week_first_day.strftime('%d.%m.%Y'),
                                                edate=next_week_last_day.strftime('%d.%m.%Y'), user_id=user.get_id())
@@ -817,14 +818,14 @@ def main_menu(message):
         elif request == KEYBOARD['TIMETABLE']:
 
             t = ''
-            t += '{} - 8:00 - 09:20\n'.format(emoji_numbers[1])
+            t += '{} - 8:00 - 9:20\n'.format(emoji_numbers[1])
             t += '{} - 9:30 - 10:50\n'.format(emoji_numbers[2])
-            t += '{} - 11:00 - 12:20\n'.format(emoji_numbers[3])
-            t += '{} - 13:00 - 14:20\n'.format(emoji_numbers[4])
-            t += '{} - 14:30 - 15:50 \n'.format(emoji_numbers[5])
-            t += '{} - 16:00 - 17:20 \n'.format(emoji_numbers[6])
-            t += '{} - 17:30 - 18:50 \n'.format(emoji_numbers[7])
-            t += '{} - 19:00 - 20:20 \n'.format(emoji_numbers[8])
+            t += '{} - 11:10 - 12:30\n'.format(emoji_numbers[3])
+            t += '{} - 12:40 - 14:00\n'.format(emoji_numbers[4])
+            t += '{} - 11:10 - 15:30 \n'.format(emoji_numbers[5])
+            t += '{} - 15:40 - 17:00 \n'.format(emoji_numbers[6])
+            t += '{} - 17:10 - 18:30 \n'.format(emoji_numbers[7])
+            t += '{} - 18:40 - 20:00 \n'.format(emoji_numbers[8])
 
             bot.send_message(user.get_id(), t, reply_markup=keyboard)
 
